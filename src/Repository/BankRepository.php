@@ -3,22 +3,74 @@
 namespace App\Repository;
 
 use App\Entity\Bank;
-use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
-use Doctrine\Persistence\ManagerRegistry;
+use App\RepositoryInterface\BankRepositoryInterface;
+use Doctrine\ORM\EntityManager;
+use mysql_xdevapi\Exception;
 
-/**
- * @method Bank|null find($id, $lockMode = null, $lockVersion = null)
- * @method Bank|null findOneBy(array $criteria, array $orderBy = null)
- * @method Bank[]    findAll()
- * @method Bank[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
- */
-class BankRepository extends ServiceEntityRepository
+
+class BankRepository implements BankRepositoryInterface
 {
-    public function __construct(ManagerRegistry $registry)
+
+    private EntityManager $entityManager;
+    private $objectRepository;
+
+    public function __construct(EntityManager $entityManager)
     {
-        parent::__construct($registry, Bank::class);
+        $this->entityManager = $entityManager;
+        $this->objectRepository = $this->entityManager->getRepository(Bank::class);
     }
 
+    public function find(int $BankId):Bank
+    {
+        return $this->objectRepository->find($BankId);
+    }
+
+    public function findOneByName(String $BankName):Bank
+    {
+        return $this->objectRepository->findOneBy(['name' => $BankName]);
+    }
+
+    public function findOneById(int $BankId):Bank
+    {
+        return $this->objectRepository->findOneBy(['id' => $BankId]);
+    }
+
+    public function saveBank(Bank $bank):bool
+    {
+            $this->entityManager->persist($bank);
+            $this->entityManager->flush();
+            return true;
+    }
+
+    public function createBank(Bank $bank): bool
+    {
+        try
+        {
+            $this->entityManager->persist($bank);
+            $this->entityManager->flush();
+            return true;
+
+        } catch (Exception $exception)
+        {
+            return false;
+            echo $exception;
+
+        }
+    }
+
+    public function updateBank(int $bankId): bool
+    {
+        // TODO: Implement updateBank() method.
+
+        return true;
+    }
+
+    public function deleteBank(int $bankId): bool
+    {
+        // TODO: Implement deleteBank() method.
+
+        return true;
+    }
     // /**
     //  * @return Bank[] Returns an array of Bank objects
     //  */
